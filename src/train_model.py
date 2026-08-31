@@ -378,21 +378,17 @@ def select_model_features(df):
 
     selected_features = [
         c for c in numeric_cols
-        if c not in constant_cols
+        
     ]
 
-    if constant_cols:
-        print(
-            f'Removing {len(constant_cols)} globally constant feature(s): '
-            f'{constant_cols}'
-        )
+
 
     if not selected_features:
         raise ValueError(
             'No usable numerical model features remain after constant-feature removal.'
         )
 
-    return selected_features, constant_cols
+    return selected_features
 
 def validate_model_features(X, pooled):
     """
