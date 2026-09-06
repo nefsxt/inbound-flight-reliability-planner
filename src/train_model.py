@@ -1107,7 +1107,6 @@ def write_manifest(
     pooled_result,
     carrier_results,
     model_feature_columns,
-    removed_constant_features,
     tune,
     n_trials,
     pooled_n_folds
@@ -1165,7 +1164,6 @@ def write_manifest(
         },
         'feature_selection': {
             'base_features': model_feature_columns,
-            'removed_constant_features': removed_constant_features,
             'pooled_additional_feature': 'airline',
             'excluded_from_model': sorted(EXCLUDED_FEATURE_COLUMNS),
         },
@@ -1237,7 +1235,7 @@ def train_route(df, route, tune=False, n_trials=DEFAULT_TRIALS):
 
     train_df, test_df = chronological_split(df)
 
-    model_feature_columns, removed_constant_features = select_model_features(df)
+    model_feature_columns = select_model_features(df)
 
     pooled_n_folds, pooled_complete_years = determine_cv_folds(train_df)
 
@@ -1255,7 +1253,6 @@ def train_route(df, route, tune=False, n_trials=DEFAULT_TRIALS):
         'complete_training_years_pooled': pooled_complete_years,
         'pooled_n_validation_folds': pooled_n_folds,
         'model_features': model_feature_columns,
-        'removed_constant_features': removed_constant_features,
         'outlier_rule': {
             'duration_gt_minutes': OUTLIER_DURATION_MINUTES,
             'date_filter': None
@@ -1364,7 +1361,6 @@ def train_route(df, route, tune=False, n_trials=DEFAULT_TRIALS):
         pooled_result,
         carrier_results,
         model_feature_columns,
-        removed_constant_features,
         tune,
         n_trials,
         pooled_n_folds
