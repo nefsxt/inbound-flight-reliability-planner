@@ -414,6 +414,25 @@ def test_request_historical_chunk_raises_after_persistent_timeout(monkeypatch, m
 # fetch_historical_weather
 # ---------------------------------------------------------------------------
 
+
+def make_valid_cached_chunk(times, airport="LGTS"):
+
+    """Helper to create a valid cached historical chunk DataFrame for testing."""
+
+    df = pd.DataFrame(
+        {
+            "time": pd.to_datetime(times, utc=True),
+            "airport": [airport] * len(times),
+        }
+    )
+
+    for i, column in enumerate(weather.HOURLY_VARS):
+        df[column] = float(i + 1)
+
+    return df
+
+
+
 def test_fetch_historical_weather_fetches_and_caches_chunk(monkeypatch, mock_config,):
     """
     Verify the happy path: a historical API response is converted to a
@@ -501,12 +520,9 @@ def test_fetch_historical_weather_uses_cached_chunks_without_api_call(monkeypatc
     Verify resumability: previously cached chunks are loaded directly and
     do not trigger another Historical Forecast API request.
     """
-    cached = pd.DataFrame(
-        {
-            "time": pd.to_datetime(["2026-01-01T00:00:00Z"], utc=True,),
-            "temperature_2m": [5.0],
-            "airport": ["LGTS"],
-        }
+    cached = make_valid_cached_chunk(
+        ["2026-01-01T00:00:00Z"],
+        airport="LGTS",
     )
 
     monkeypatch.setattr(weather, "historical_chunk_path", lambda *args: "cached.parquet",)
@@ -573,32 +589,20 @@ def test_fetch_historical_weather_deduplicates_and_sorts_chunks(monkeypatch, moc
     and sorted chronologically.
     """
     chunks = [
-        pd.DataFrame(
-            {
-                "time": pd.to_datetime(
-                    [
-                        "2026-01-02T01:00:00Z",
-                        "2026-01-02T00:00:00Z",
-                    ],
-                    utc=True,
-                ),
-                "temperature_2m": [2.0, 1.0],
-            }
+        make_valid_cached_chunk(
+            [
+                "2026-01-02T01:00:00Z",
+                "2026-01-02T00:00:00Z",
+            ]
         ),
-        pd.DataFrame(
-            {
-                "time": pd.to_datetime(
-                    [
-                        "2026-01-02T00:00:00Z",
-                        "2026-01-03T00:00:00Z",
-                    ],
-                    utc=True,
-                ),
-                "temperature_2m": [1.0, 3.0],
-            }
+        make_valid_cached_chunk(
+            [
+                "2026-01-02T00:00:00Z",
+                "2026-01-03T00:00:00Z",
+            ]
         ),
     ]
-
+    
     monkeypatch.setattr(weather, "historical_chunk_path", lambda *args: "chunk.parquet",)
 
     cached_index = {"value": 0}
