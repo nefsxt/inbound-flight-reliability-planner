@@ -17,7 +17,7 @@ Both are free, keyless.
 
 Route-level datasets live at:
 
-    data/raw/<ORIGIN>_<DEST>/weather.parquet
+    data/processed/<ORIGIN>_<DEST>/weather.parquet
 
 Individual historical API chunks are cached separately, per airport (shared
 across any route touching that airport):
@@ -280,9 +280,16 @@ def fetch_historical_weather(airport_icao: str, lat: float, lon: float, start_da
             current_start,
             current_end,
         )
+
         chunk_cached = load_or_none(chunk_path)
 
-        if chunk_cached is not None:
+        required_columns = {"time", "airport", *HOURLY_VARS}
+
+        if (
+            chunk_cached is not None
+            and not chunk_cached.empty
+            and required_columns.issubset(chunk_cached.columns)
+        ):
             print(
                 f"  {airport_icao}: cached chunk "
                 f"{current_start.strftime('%Y-%m-%d')} -> "
@@ -291,6 +298,14 @@ def fetch_historical_weather(airport_icao: str, lat: float, lon: float, start_da
             chunks.append(chunk_cached)
             current_start = current_end + pd.Timedelta(days=1)
             continue
+
+        if chunk_cached is not None:
+            print(
+                f"  {airport_icao}: invalid/incomplete cached chunk; "
+                f"refetching "
+                f"{current_start.strftime('%Y-%m-%d')} -> "
+                f"{current_end.strftime('%Y-%m-%d')}"
+            )
 
         print(
             f"  {airport_icao}: fetching "
