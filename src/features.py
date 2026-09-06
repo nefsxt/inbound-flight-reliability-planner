@@ -356,7 +356,7 @@ def prepare_flights(df: pd.DataFrame) -> pd.DataFrame:
         3. validates chronological ordering
         4. rejects duplicate observations
         5. creates rounded hourly UTC timestamps
-        6. creates the string merge keys used by the weather join
+        6. creates timezone-aware UTC hourly merge keys used by the weather join
         7. creates hour_of_day and month
         8. creates flight_duration
         9. creates the airline feature
@@ -395,15 +395,12 @@ def prepare_flights(df: pd.DataFrame) -> pd.DataFrame:
     df["firstSeen_hourly_utc"] = df["firstSeen"].dt.round("h")
     df["lastSeen_hourly_utc"] = df["lastSeen"].dt.round("h")
 
-    # String merge keys are deliberately retained in the final dataframe.
-    # They also make the timestamp precision/unit completely explicit.
-    df["dep_merge_key"] = df["firstSeen_hourly_utc"].dt.strftime(
-        "%Y-%m-%d %H:00"
-    )
-
-    df["arr_merge_key"] = df["lastSeen_hourly_utc"].dt.strftime(
-        "%Y-%m-%d %H:00"
-    )
+    # Timezone-aware UTC hourly merge keys are retained in the final dataframe.
+    # Both flight and weather keys use the same datetime representation so that
+    #the MultiIndex weather lookup is type-safe.
+    
+    df["dep_merge_key"] = df["firstSeen_hourly_utc"]
+    df["arr_merge_key"] = df["lastSeen_hourly_utc"]
 
     # ------------------------------------------------------------------
     # Time features.
