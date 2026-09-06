@@ -375,7 +375,7 @@ def test_parse_opensky_timestamp_handles_unix_integers():
     # Provide a raw integer like the one that OpenSky actually outputs
     series = pd.Series([1704870000])
 
-    parsed = parse_opensky_timestamp(series)
+    parsed = parse_opensky_timestamp(series,'firstSeen')
 
     # The returned Series must always use the UTC timezone
     assert str(parsed.dt.tz) == "UTC"
