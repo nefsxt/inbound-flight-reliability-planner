@@ -346,7 +346,7 @@ def update_route(origin: str, destination: str, force: bool = False,) -> dict:
     # Determine missing range
     # --------------------------------------------------------------
 
-    today = dt.date.today()
+    today = _utc_now().date()
 
     last_flight_date = get_last_flight_date(origin, destination,)
     last_weather_date = get_last_weather_date(origin, destination,)
