@@ -1,0 +1,64 @@
+name: Monthly model retrain
+
+# Schedule: Automates data processing and ML retraining monthly.
+# Manual: Allows triggering a run via GitHub UI with optional tuning options.
+on:
+  schedule:
+    - cron: "0 4 1 * *"  # Runs at 04:00 UTC on the 1st of every month
+  workflow_dispatch:
+    inputs:
+      tune:
+        description: "Run Optuna hyperparameter tuning (slower)"
+        type: boolean
+        default: false
+      trials:
+        description: "Optuna trials per quantile/model (only used if tune=true)"
+        type: number
+        default: 40
+
+permissions:
+  contents: read
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Pull the latest repository code
+      - uses: actions/checkout@v4
+
+      # Set up Python with caching enabled for faster package installs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # Install all required Python packages
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Securely download current datasets from Hugging Face
+      - name: Download current data from Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python -m src.hf_storage --download --dir .
+
+      # Process raw data and rebuild the feature matrix
+      - name: Rebuild feature matrix
+        run: python -m src.features
+
+      # Train models. Runs hyperparameter tuning only if manually requested.
+      - name: Retrain all model tiers
+        run: |
+          if [ "${{ inputs.tune }}" = "true" ]; then
+            python -m src.train_model --tune --trials "${{ inputs.trials || 40 }}"
+          else
+            python -m src.train_model
+          fi
+
+      # Securely upload new features and fresh models back to Hugging Face
+      - name: Push updated features and models to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: python -m src.hf_storage --upload

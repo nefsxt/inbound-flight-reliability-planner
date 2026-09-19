@@ -1,0 +1,64 @@
+name: Daily Data Update and Sync
+
+# Schedule: Automates fetching external API data daily.
+# Scope: Collects fresh flight (OpenSky) and weather (Open-Meteo) metrics.
+# Optimization: Skips execution entirely if data is already up-to-date.
+on:
+  schedule:
+    - cron: "0 3 * * *" # Runs at 03:00 UTC every day
+  workflow_dispatch: {} # Allows manual execution via the GitHub UI
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    # Shares the freshness check results so subsequent steps can read it
+    outputs:
+      needs_update: ${{ steps.check.outputs.needs_update }}
+
+    steps:
+      # Pull the latest repository code
+      - uses: actions/checkout@v4
+
+      # Set up Python 3.11 with automated dependency caching
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # Install all required Python packages
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Scan Hugging Face file metadata to see if yesterday's data is already fetched
+      - name: Check remote data freshness
+        id: check
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python -m src.hf_storage --check | tee -a "$GITHUB_OUTPUT"
+
+      # Restore existing historical datasets only if new data is needed
+      - name: Restore existing data from Hugging Face
+        if: steps.check.outputs.needs_update == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python -m src.hf_storage --download --dir .
+
+      # Connect to external APIs and fetch the latest incremental updates
+      - name: Run daily incremental update
+        if: steps.check.outputs.needs_update == 'true'
+        env:
+          OPENSKY_CLIENT_ID: ${{ secrets.OPENSKY_CLIENT_ID }}
+          OPENSKY_CLIENT_SECRET: ${{ secrets.OPENSKY_CLIENT_SECRET }}
+        run: python -m src.update_data
+
+      # Push the newly aggregated data back to Hugging Face (skips model files)
+      - name: Push updated data to Hugging Face
+        if: steps.check.outputs.needs_update == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: python -m src.hf_storage --upload --data-only

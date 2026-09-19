@@ -1,0 +1,61 @@
+name: CI
+
+# Schedule: Runs automatically on every push or Pull Request targeting the main branch.
+# Scope: Pure unit tests and code verification. No external API calls or secrets required.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Multi-version testing: Runs the entire pipeline on both Python 3.11 and 3.12
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      # Pull the latest repository code
+      - uses: actions/checkout@v4
+
+      # Set up the specific Python version with automated dependency caching
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      # Install all required Python packages
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Byte-compile files to catch typos and syntax errors instantly
+      - name: Byte-compile every module (catches syntax errors early)
+        run: python -m py_compile config.py $(find src app -name "*.py")
+
+      # Statically scan files to ensure internal "src" and "config" import targets exist
+      - name: Verify local module imports resolve
+        run: |
+          python - <<'PY'
+          import ast, importlib.util, pathlib, sys
+
+          ok = True
+          for path in pathlib.Path(".").glob("**/*.py"):
+              if "__pycache__" in path.parts or path.parts[0] == "tests":
+                  continue
+              tree = ast.parse(path.read_text(), filename=str(path))
+              for node in ast.walk(tree):
+                  if isinstance(node, ast.ImportFrom) and node.module and (
+                      node.module == "config" or node.module.startswith("src.")
+                  ):
+                      if importlib.util.find_spec(node.module) is None:
+                          print(f"::error file={path}::import target '{node.module}' does not exist")
+                          ok = False
+          sys.exit(0 if ok else 1)
+          PY
+
+      # Execute the unit test suite with detailed verbose logging
+      - name: Run tests
+        run: python -m pytest tests/ -v
