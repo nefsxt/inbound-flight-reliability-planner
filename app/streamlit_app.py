@@ -1,4 +1,3 @@
-```python
 """
 Inbound Flight Reliability -- decision-support dashboard.
 
@@ -1348,4 +1347,4 @@ with tab_predictor:
                             f"{config.EU261_DELAY_THRESHOLD_MINUTES} "
                             "minutes, shown for context only."
                         )
-```
+
