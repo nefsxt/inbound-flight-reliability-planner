@@ -79,8 +79,7 @@ Two tabs:
 
 ## Use the live app online
 
-**Live app:** `[https://<your-streamlit-app>.streamlit.app](https://inbound-flight-time-anomaly-prediction.streamlit.app/)`
-link once deployed; see below)*
+**Live app:** [https://inbound-flight-time-anomaly-prediction.streamlit.app](https://inbound-flight-time-anomaly-prediction.streamlit.app/)
 
 
 ## Use it via Docker
