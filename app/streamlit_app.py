@@ -366,7 +366,7 @@ def load_json(path):
         return json.load(f)
 
 
-@st.cache_data
+
 def load_tier_manifest(origin, destination):
 
     path = os.path.join(
