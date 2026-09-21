@@ -814,6 +814,7 @@ st.title(
 st.markdown(
     """
     A proof-of-concept decision-support tool for **inbound ground-operations buffer planning**. 
+    
     Instead of predicting a single delay value, the app combines historical flight data with 
     **real-time weather forecasts** to produce three probabilistic planning scenarios: 
     **Typical (P50), Cautious (P90), and Safe (P95)**.
@@ -822,7 +823,7 @@ st.markdown(
 
     `Flight Duration Anomaly = Actual Gate-to-Gate Duration − Route Historical Median`
 
-    This means the predictions describe deviations from typical observed flight duration—not whether a flight will meet its published commercial schedule.
+    This means the predictions describe **deviations from typical observed flight duration**, not whether a flight will meet its published commercial schedule.
 
     The three quantiles provide progressively more conservative references for evaluating current conditions and deciding how much operational buffer may be appropriate.
 
@@ -842,7 +843,6 @@ st.caption(
     "[OpenSky Network](https://opensky-network.org/) "
     "· "
     "[Open-Meteo](https://open-meteo.com/) "
-    "(weather, historical + forecast)"
 )
 
 
