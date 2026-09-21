@@ -368,12 +368,12 @@ st.sidebar.write(
 )
 
 
-#with open(
-#    tier_manifest_path("EDDF", "LGTS"),
-#    "r",
-#    encoding="utf-8",
-#) as f:
-#    manifest = json.load(f)
+with open(
+    tier_manifest_path("EDDF", "LGTS"),
+    "r",
+    encoding="utf-8",
+) as f:
+    manifest = json.load(f)
 
 #st.sidebar.write("Tier manifest:", manifest)
 
