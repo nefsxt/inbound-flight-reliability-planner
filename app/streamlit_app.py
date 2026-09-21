@@ -405,19 +405,40 @@ for quantile, details in all_carriers.get("quantiles", {}).items():
 #    model_file,
 #)
 
-st.sidebar.write(
-    f"{tier} P{q_str} model exists:",
-    os.path.exists(model_file),
+model_path = os.path.join(
+    DATA_ROOT,
+    "models",
+    "EDDF_LGTS",
+    "all_carriers",
+    "quantile_0.5.json",
+)
+
+preprocessing_path = os.path.join(
+    DATA_ROOT,
+    "models",
+    "EDDF_LGTS",
+    "all_carriers",
+    "preprocessing_0.5.pkl",
 )
 
 st.sidebar.write(
-    f"{tier} P{q_str} preprocessing path:",
-    preprocessing_file,
+    "P50 model exists:",
+    os.path.isfile(model_path),
 )
 
 st.sidebar.write(
-    f"{tier} P{q_str} preprocessing exists:",
-    os.path.exists(preprocessing_file),
+    "P50 preprocessing exists:",
+    os.path.isfile(preprocessing_path),
+)
+
+st.sidebar.write(
+    "P50 model path:",
+    model_path,
+)
+
+st.sidebar.write(
+    "P50 preprocessing path:",
+    preprocessing_path,
 )
 # ---------------------------------------------------------------------------
 # Route configuration
