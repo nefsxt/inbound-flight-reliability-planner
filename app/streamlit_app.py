@@ -400,7 +400,25 @@ for quantile, details in all_carriers.get("quantiles", {}).items():
         f"Quantile {quantile} production:",
         details.get("production"),
     )
+#st.sidebar.write(
+#    f"{tier} P{q_str} model path:",
+#    model_file,
+#)
 
+st.sidebar.write(
+    f"{tier} P{q_str} model exists:",
+    os.path.exists(model_file),
+)
+
+st.sidebar.write(
+    f"{tier} P{q_str} preprocessing path:",
+    preprocessing_file,
+)
+
+st.sidebar.write(
+    f"{tier} P{q_str} preprocessing exists:",
+    os.path.exists(preprocessing_file),
+)
 # ---------------------------------------------------------------------------
 # Route configuration
 # ---------------------------------------------------------------------------
@@ -480,7 +498,9 @@ def load_tier_models(origin, destination):
         A3
         etc.
     """
-
+    preprocessing_file = _absolute_model_path(
+        preprocessing_path
+    )
     manifest = load_tier_manifest(
         origin,
         destination,
