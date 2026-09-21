@@ -59,10 +59,12 @@ from src.fetch_weather import (
 # ---------------------------------------------------------------------------
 
 st.set_page_config(
-    page_title="Inbound Flight Reliability",
-    page_icon="✈️",
+    page_title="Inbound Flight-Time Anomaly Prediction",
+    page_icon="🛬",
     layout="wide",
 )
+###  
+
 
 
 # ---------------------------------------------------------------------------
@@ -202,7 +204,7 @@ def route_model_dir(origin, destination):
     return os.path.join(
         DATA_ROOT,
         "models",
-        route_key(origin, destination),
+        config.route_key(origin, destination),
     )
 
 
@@ -805,20 +807,24 @@ def cached_live_weather(
 # ---------------------------------------------------------------------------
 
 st.title(
-    "✈️ Inbound Flight Reliability"
+    "🛬 Inbound Flight-Time Anomaly Prediction"
 )
 
 
 st.markdown(
-    "A decision-support tool for ground-ops buffer planning on inbound "
-    "flights. Rather than a single delay estimate, it predicts a **range "
-    "of likely flight-duration outcomes** (Typical / Cautious / Safe) "
-    "using XGBoost quantile regression trained on historical flight and "
-    "weather data — a **global model** for the route, plus a **dedicated "
-    "model per airline** where enough history exists. The Live Predictor "
-    "tab feeds in today's actual weather forecast for a live recommendation."
-)
+    "A proof-of-concept decision-support tool for **inbound ground-operations buffer planning**. Instead of predicting a single delay value, the app combines historical flight data with **real-time weather forecasts** to produce three probabilistic planning scenarios: **Typical (P50), Cautious (P90), and Safe (P95)**."
 
+    "The models predict **flight-duration anomalies** relative to the historical median for each route:"
+
+    "`Flight Duration Anomaly = Actual Gate-to-Gate Duration − Route Historical Median`"
+
+    "This means the predictions describe deviations from typical observed flight duration—not whether a flight will meet its published commercial schedule."
+
+    "The three quantiles provide progressively more conservative references for evaluating current conditions and deciding how much operational buffer may be appropriate."
+
+    "See [README.md](#) and [ARCHITECTURE.md](#) for more details. "
+    "[GitHub Repository](https://github.com/nefsxt/inbound-flight-reliability-planner)"
+)
 
 st.caption(
     "Data sources: "
