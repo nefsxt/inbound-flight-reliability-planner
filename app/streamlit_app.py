@@ -466,14 +466,6 @@ def load_tier_models(origin, destination):
                 preprocessing_path
             )
 
-            st.write(
-                "Loading:",
-                tier,
-                q_str,
-                model_file,
-                preprocessing_file,
-            )
-
             if not model_file or not os.path.exists(model_file):
                 st.error(
                     f"Model file missing: {model_file}"
@@ -497,11 +489,6 @@ def load_tier_models(origin, destination):
                     model_file
                 )
 
-                st.write(
-                    "Model loaded:",
-                    tier,
-                    q_str,
-                )
 
             except Exception as exc:
                 st.error(
@@ -513,12 +500,6 @@ def load_tier_models(origin, destination):
             try:
                 preprocessing = joblib.load(
                     preprocessing_file
-                )
-
-                st.write(
-                    "Preprocessing loaded:",
-                    tier,
-                    q_str,
                 )
 
             except Exception as exc:
@@ -545,10 +526,6 @@ def load_tier_models(origin, destination):
         if per_quantile:
             loaded[tier] = per_quantile
 
-    st.write(
-        "FINAL LOADED TIERS:",
-        loaded.keys(),
-    )
 
     return loaded
 
@@ -672,21 +649,6 @@ def predict_tier(
 
 def typical_row_for_route(features_df, origin, destination):
     expected = route_key(origin, destination)
-
-    st.write(
-        "FEATURE ROUTE:",
-        repr(features_df["route"].dropna().iloc[0]),
-    )
-
-    st.write(
-        "EXPECTED ROUTE:",
-        repr(expected),
-    )
-
-    st.write(
-        "MATCHES:",
-        (features_df["route"] == expected).sum(),
-    )
 
     route_df = features_df[
         features_df["route"] == expected
@@ -929,15 +891,6 @@ with tab_dashboard:
 
         features_df = load_features()
 
-        st.write(
-            "Feature route examples:",
-            features_df["route"].dropna().unique()[:20],
-        )
-
-        st.write(
-            "Expected feature route:",
-            route_key(origin, destination),
-        )
 
         if not manifest or not tier_models:
 
