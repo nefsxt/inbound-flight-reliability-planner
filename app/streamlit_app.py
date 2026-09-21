@@ -922,6 +922,16 @@ with tab_dashboard:
 
         features_df = load_features()
 
+        st.write(
+        "Feature route examples:",
+        features_df["route"].dropna().unique()[:20],
+        )  
+
+        st.write(
+        "Expected feature route:",
+         route_label(origin, destination),
+         )
+
         if not manifest or not tier_models:
 
             st.info(
