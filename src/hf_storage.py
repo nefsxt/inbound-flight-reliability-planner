@@ -232,6 +232,29 @@ def download_from_hf(local_dir: str = ".") -> str:
     )
 
 
+def download_inference_artifacts(local_dir: str = ".") -> str:
+    """
+    Download only the processed features and trained models
+    required for inference.
+    """
+    token = os.environ.get("HF_TOKEN")
+
+    if not token:
+        raise RuntimeError(
+            "HF_TOKEN is not set. Cannot download from Hugging Face."
+        )
+
+    return snapshot_download(
+        repo_id=config.HF_REPO_ID,
+        repo_type=config.HF_REPO_TYPE,
+        local_dir=local_dir,
+        token=token,
+        allow_patterns=[
+            "data/processed/features.parquet",
+            "models/**",
+        ],
+    )
+
 def clear_local_cache() -> None:
     """Wipes out local data/ and models/ directories to guarantee a fresh state."""
     for directory in (LOCAL_DATA_DIR, LOCAL_MODELS_DIR):

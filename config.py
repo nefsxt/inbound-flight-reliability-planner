@@ -117,7 +117,7 @@ HF_REPO_TYPE = "dataset"
 
 
 # --- EU261-style reference threshold (for dashboard framing only) ---------
-EU261_DELAY_THRESHOLD_MINUTES = 15
+EU261_DELAY_THRESHOLD_MINUTES = 180  # 3 hours
 
 
 # ---------------------------------------------------------------------------
