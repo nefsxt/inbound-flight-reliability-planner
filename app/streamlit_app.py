@@ -664,24 +664,18 @@ def predict_tier(
         route_median,
     )
 
+def typical_row_for_route(features_df, origin, destination):
+    expected = route_key(origin, destination)
 
-def typical_row_for_route(
-    features_df,
-    origin,
-    destination,
-):
-    """
-    Average weather + modal hour + current month for this route.
-
-    Used by the Dashboard tab's at-a-glance model results.
-    """
+    st.write("FEATURE ROUTE:", repr(features_df["route"].dropna().iloc[0]))
+    st.write("EXPECTED ROUTE:", repr(expected))
+    st.write(
+        "MATCHES:",
+        (features_df["route"] == expected).sum(),
+    )
 
     route_df = features_df[
-        features_df["route"]
-        == route_label(
-            origin,
-            destination,
-        )
+        features_df["route"] == expected
     ]
 
     if route_df.empty:
