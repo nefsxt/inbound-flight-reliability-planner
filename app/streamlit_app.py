@@ -827,7 +827,12 @@ st.markdown(
     The three quantiles provide progressively more conservative references for evaluating current conditions and deciding how much operational buffer may be appropriate.
 
     See [README.md](#) and [ARCHITECTURE.md](#) for more details.  
+
     [GitHub Repository](https://github.com/nefsxt/inbound-flight-reliability-planner)
+
+    **Disclaimer:** This is an independent, non-commercial portfolio project using publicly available data. Airline names are included for identification purposes only. Predictions are model-generated estimates and are not official airline information or operational guidance.
+
+
     """
 )
 
