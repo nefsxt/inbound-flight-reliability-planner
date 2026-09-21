@@ -334,7 +334,38 @@ with st.sidebar:
         f"Data root: `{DATA_ROOT}`"
     )
 
+st.sidebar.write("Data source:", DATA_SOURCE)
+st.sidebar.write("Data root:", DATA_ROOT)
 
+models_root = os.path.join(DATA_ROOT, "models")
+
+st.sidebar.write(
+    "Models directory exists:",
+    os.path.isdir(models_root),
+)
+
+if os.path.isdir(models_root):
+    st.sidebar.write(
+        "Model directories:",
+        os.listdir(models_root),
+    )
+
+st.sidebar.write(
+    "Expected model directory:",
+    route_model_dir("EDDF", "LGTS"),
+)
+
+st.sidebar.write(
+    "Expected manifest:",
+    tier_manifest_path("EDDF", "LGTS"),
+)
+
+st.sidebar.write(
+    "Manifest exists:",
+    os.path.isfile(
+        tier_manifest_path("EDDF", "LGTS")
+    ),
+)
 # ---------------------------------------------------------------------------
 # Route configuration
 # ---------------------------------------------------------------------------
@@ -812,18 +843,25 @@ st.title(
 
 
 st.markdown(
-    "A proof-of-concept decision-support tool for **inbound ground-operations buffer planning**. Instead of predicting a single delay value, the app combines historical flight data with **real-time weather forecasts** to produce three probabilistic planning scenarios: **Typical (P50), Cautious (P90), and Safe (P95)**."
+    """
+    A proof-of-concept decision-support tool for **inbound ground-operations buffer planning**. 
+    Instead of predicting a single delay value, the app combines historical flight data with 
+    **real-time weather forecasts** to produce three probabilistic planning scenarios: 
+    **Typical (P50), Cautious (P90), and Safe (P95)**.
 
-    "The models predict **flight-duration anomalies** relative to the historical median for each route:"
+    The models predict **flight-duration anomalies** relative to the historical median for each route:
 
-    "`Flight Duration Anomaly = Actual Gate-to-Gate Duration − Route Historical Median`"
+    `Flight Duration Anomaly = Actual Gate-to-Gate Duration − Route Historical Median`
 
-    "This means the predictions describe deviations from typical observed flight duration—not whether a flight will meet its published commercial schedule."
+    This means the predictions describe deviations from typical observed flight duration—not whether a flight will meet its published commercial schedule.
 
-    "The three quantiles provide progressively more conservative references for evaluating current conditions and deciding how much operational buffer may be appropriate."
+    The three quantiles provide progressively more conservative references for evaluating current conditions and deciding how much operational buffer may be appropriate.
 
-    "See [README.md](#) and [ARCHITECTURE.md](#) for more details. "
-    "[GitHub Repository](https://github.com/nefsxt/inbound-flight-reliability-planner)"
+    See [README.md](#) and [ARCHITECTURE.md](#) for more details.  
+    [GitHub Repository](https://github.com/nefsxt/inbound-flight-reliability-planner)
+    """
+)
+
 )
 
 st.caption(
