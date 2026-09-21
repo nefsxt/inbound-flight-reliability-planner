@@ -368,14 +368,32 @@ st.sidebar.write(
 )
 
 
-with open(
-    tier_manifest_path("EDDF", "LGTS"),
-    "r",
-    encoding="utf-8",
-) as f:
-    manifest = json.load(f)
+#with open(
+#    tier_manifest_path("EDDF", "LGTS"),
+#    "r",
+#    encoding="utf-8",
+#) as f:
+#    manifest = json.load(f)
 
-st.sidebar.write("Tier manifest:", manifest)
+#st.sidebar.write("Tier manifest:", manifest)
+
+all_carriers = manifest.get("all_carriers", {})
+
+st.sidebar.write(
+    "all_carriers keys:",
+    list(all_carriers.keys()),
+)
+
+st.sidebar.write(
+    "quantile keys:",
+    list(all_carriers.get("quantiles", {}).keys()),
+)
+
+for quantile, details in all_carriers.get("quantiles", {}).items():
+    st.sidebar.write(
+        f"Quantile {quantile} keys:",
+        list(details.keys()),
+    )
 
 # ---------------------------------------------------------------------------
 # Route configuration
