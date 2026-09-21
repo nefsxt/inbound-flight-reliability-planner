@@ -179,19 +179,6 @@ else:
 # Paths
 # ---------------------------------------------------------------------------
 
-def route_key(origin, destination):
-    """
-    Route key used by the feature dataset and model directories.
-
-    Example:
-        EDDF -> LGTS
-
-    becomes:
-        EDDF->LGTS
-    """
-
-    return f"{origin}->{destination}"
-
 
 def route_label(origin, destination):
     return f"{origin} → {destination}"
@@ -366,7 +353,7 @@ def load_json(path):
         return json.load(f)
 
 
-
+@st.cache_data
 def load_tier_manifest(origin, destination):
 
     path = os.path.join(
@@ -691,7 +678,7 @@ def typical_row_for_route(
 
     route_df = features_df[
         features_df["route"]
-        == route_key(
+        == route_label(
             origin,
             destination,
         )
@@ -802,7 +789,7 @@ def eligible_airlines_for_route(
 
     route_df = features_df[
         features_df["route"]
-        == route_key(
+        == route_label(
             origin,
             destination,
         )
