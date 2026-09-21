@@ -665,7 +665,7 @@ def predict_tier(
     )
 
 def typical_row_for_route(features_df, origin, destination):
-    expected = route_key(origin, destination)
+    expected = config.route_key(origin, destination)
 
     st.write("FEATURE ROUTE:", repr(features_df["route"].dropna().iloc[0]))
     st.write("EXPECTED ROUTE:", repr(expected))
