@@ -18,6 +18,7 @@ Data:
     data_cache/ and all data/model reads are performed from that directory.
 """
 
+from ast import Load
 import datetime as dt
 import json
 import os
@@ -488,7 +489,6 @@ def load_features():
 
     return pd.read_parquet(path)
 
-
 @st.cache_resource
 def load_tier_models(origin, destination):
     """
@@ -497,28 +497,9 @@ def load_tier_models(origin, destination):
 
     Models and preprocessing artifacts are loaded from the paths defined in
     each quantile's ``production`` section of the route tier manifest.
-
-    Returns:
-
-        {
-            tier_name: {
-                quantile: {
-                    "model": xgb.XGBRegressor,
-                    "preprocessing": dict
-                }
-            }
-        }
-
-    Tier names are:
-
-        all_carriers
-
-    and/or airline codes such as:
-
-        AEE
-        A3
-        etc.
+    
     """
+
 
     manifest = load_tier_manifest(
         origin,
@@ -526,6 +507,9 @@ def load_tier_models(origin, destination):
     )
 
     if not manifest:
+        st.error(
+            f"No tier manifest found for {origin}->{destination}"
+        )
         return {}
 
     tiers = {
@@ -591,27 +575,67 @@ def load_tier_models(origin, destination):
                 preprocessing_path
             )
 
-            if (
-                not model_file
-                or not os.path.exists(model_file)
-            ):
+            st.write(
+                "Loading:",
+                tier,
+                q_str,
+                model_file,
+                preprocessing_file,
+            )
+
+            if not model_file or not os.path.exists(model_file):
+                st.error(
+                    f"Model file missing: {model_file}"
+                )
                 continue
 
             if (
                 not preprocessing_file
                 or not os.path.exists(preprocessing_file)
             ):
+                st.error(
+                    f"Preprocessing file missing: "
+                    f"{preprocessing_file}"
+                )
                 continue
 
-            model = xgb.XGBRegressor()
+            try:
+                model = xgb.XGBRegressor()
 
-            model.load_model(
-                model_file
-            )
+                model.load_model(
+                    model_file
+                )
 
-            preprocessing = joblib.load(
-                preprocessing_file
-            )
+                st.write(
+                    "Model loaded:",
+                    tier,
+                    q_str,
+                )
+
+            except Exception as exc:
+                st.error(
+                    f"Failed loading model "
+                    f"{tier} / {q_str}: {exc}"
+                )
+                continue
+
+            try:
+                preprocessing = joblib.load(
+                    preprocessing_file
+                )
+
+                st.write(
+                    "Preprocessing loaded:",
+                    tier,
+                    q_str,
+                )
+
+            except Exception as exc:
+                st.error(
+                    f"Failed loading preprocessing "
+                    f"{tier} / {q_str}: {exc}"
+                )
+                continue
 
             try:
                 quantile = float(q_str)
@@ -630,8 +654,12 @@ def load_tier_models(origin, destination):
         if per_quantile:
             loaded[tier] = per_quantile
 
-    return loaded
+    st.write(
+        "FINAL LOADED TIERS:",
+        loaded.keys(),
+    )
 
+    return loaded
 
 # ---------------------------------------------------------------------------
 # Inference
