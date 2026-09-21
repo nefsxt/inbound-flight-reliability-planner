@@ -181,7 +181,7 @@ else:
 
 
 def route_label(origin, destination):
-    return f"{origin} → {destination}"
+    return f"{origin} -> {destination}"
 
 
 def route_model_dir(origin, destination):
