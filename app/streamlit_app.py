@@ -453,8 +453,11 @@ def load_features():
 @st.cache_resource
 def load_tier_models(origin, destination):
     """
-    Load and cache XGBoost regression models and preprocessing pipelines
-    for a route.
+    Load and cache the production XGBoost regression models and preprocessing
+    pipelines for a route.
+
+    Models and preprocessing artifacts are loaded from the paths defined in
+    each quantile's ``production`` section of the route tier manifest.
 
     Returns:
 
@@ -530,16 +533,23 @@ def load_tier_models(origin, destination):
             if not isinstance(production, dict):
                 continue
 
+            model_path = production.get(
+                "model_path"
+            )
+
+            preprocessing_path = production.get(
+                "preprocessing_path"
+            )
+
+            if not model_path or not preprocessing_path:
+                continue
+
             model_file = _absolute_model_path(
-                production.get(
-                    "model_path"
-                )
+                model_path
             )
 
             preprocessing_file = _absolute_model_path(
-                production.get(
-                    "preprocessing_path"
-                )
+                preprocessing_path
             )
 
             if (
