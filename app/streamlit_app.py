@@ -389,10 +389,16 @@ st.sidebar.write(
     list(all_carriers.get("quantiles", {}).keys()),
 )
 
+#for quantile, details in all_carriers.get("quantiles", {}).items():
+#    st.sidebar.write(
+#        f"Quantile {quantile} keys:",
+#        list(details.keys()),
+#    )
+
 for quantile, details in all_carriers.get("quantiles", {}).items():
     st.sidebar.write(
-        f"Quantile {quantile} keys:",
-        list(details.keys()),
+        f"Quantile {quantile} production:",
+        details.get("production"),
     )
 
 # ---------------------------------------------------------------------------
