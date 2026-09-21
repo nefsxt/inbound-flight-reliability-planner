@@ -67,7 +67,6 @@ st.set_page_config(
 ###  
 
 
-
 # ---------------------------------------------------------------------------
 # Configuration / secrets
 # ---------------------------------------------------------------------------
@@ -178,6 +177,10 @@ else:
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
+
+
+def route_key(origin, destination):
+    return f"{origin}->{destination}"
 
 
 def route_label(origin, destination):
@@ -376,6 +379,7 @@ def load_features():
 
     return pd.read_parquet(path)
 
+
 @st.cache_resource
 def load_tier_models(origin, destination):
     """
@@ -548,6 +552,7 @@ def load_tier_models(origin, destination):
 
     return loaded
 
+
 # ---------------------------------------------------------------------------
 # Inference
 # ---------------------------------------------------------------------------
@@ -664,11 +669,20 @@ def predict_tier(
         route_median,
     )
 
-def typical_row_for_route(features_df, origin, destination):
-    expected = config.route_key(origin, destination)
 
-    st.write("FEATURE ROUTE:", repr(features_df["route"].dropna().iloc[0]))
-    st.write("EXPECTED ROUTE:", repr(expected))
+def typical_row_for_route(features_df, origin, destination):
+    expected = route_key(origin, destination)
+
+    st.write(
+        "FEATURE ROUTE:",
+        repr(features_df["route"].dropna().iloc[0]),
+    )
+
+    st.write(
+        "EXPECTED ROUTE:",
+        repr(expected),
+    )
+
     st.write(
         "MATCHES:",
         (features_df["route"] == expected).sum(),
@@ -783,7 +797,7 @@ def eligible_airlines_for_route(
 
     route_df = features_df[
         features_df["route"]
-        == route_label(
+        == route_key(
             origin,
             destination,
         )
@@ -856,7 +870,6 @@ st.markdown(
 )
 
 
-
 st.caption(
     "Data sources: "
     "[OpenSky Network](https://opensky-network.org/) "
@@ -917,14 +930,14 @@ with tab_dashboard:
         features_df = load_features()
 
         st.write(
-        "Feature route examples:",
-        features_df["route"].dropna().unique()[:20],
-        )  
+            "Feature route examples:",
+            features_df["route"].dropna().unique()[:20],
+        )
 
         st.write(
-        "Expected feature route:",
-         route_label(origin, destination),
-         )
+            "Expected feature route:",
+            route_key(origin, destination),
+        )
 
         if not manifest or not tier_models:
 
@@ -1392,4 +1405,3 @@ with tab_predictor:
                             f"{config.EU261_DELAY_THRESHOLD_MINUTES} "
                             "minutes, shown for context only."
                         )
-
