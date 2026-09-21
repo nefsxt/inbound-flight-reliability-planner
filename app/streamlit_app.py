@@ -112,14 +112,13 @@ if HF_TOKEN:
 @st.cache_resource(ttl=300)
 def sync_from_hf():
     """
-    Download the private Hugging Face data repository.
+    Download the inference artifacts from the Hugging Face
+    data repository.
 
-    The result is cached for 5 minutes. This prevents a download on every
-    Streamlit rerun while still allowing newly uploaded HF artifacts to
-    become visible without requiring a new deployment.
+    The result is cached for 5 minutes.
     """
 
-    from src.hf_storage import download_from_hf
+    from src.hf_storage import download_inference_artifacts
 
     token = get_setting("HF_TOKEN")
 
@@ -129,17 +128,16 @@ def sync_from_hf():
             "Cloud app's Settings → Secrets."
         )
 
-    # Make the token available to hf_storage.py even if that module reads
-    # os.environ rather than st.secrets.
+    # Make the token available to hf_storage.py.
     os.environ["HF_TOKEN"] = str(token)
 
-    data_root = download_from_hf(
+    data_root = download_inference_artifacts(
         local_dir="data_cache"
     )
 
     if not data_root:
         raise RuntimeError(
-            "download_from_hf() returned no local data directory."
+            "download_inference_artifacts() returned no local data directory."
         )
 
     data_root = os.path.abspath(data_root)
