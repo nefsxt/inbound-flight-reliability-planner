@@ -17,6 +17,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+import config
 import src.hf_storage as hf_storage
 
 from huggingface_hub.utils import RepositoryNotFoundError
@@ -829,3 +830,132 @@ def test_download_from_hf_does_not_warn_for_custom_directory(mock_env, tmp_path,
     captured = capsys.readouterr()
 
     assert "[WARNING]" not in captured.out
+
+
+
+# ---------------------------------------------------------------------------
+# download_inference_artifacts
+# ---------------------------------------------------------------------------
+
+
+def test_download_inference_artifacts_uses_correct_patterns(tmp_path, monkeypatch,):
+    """
+    Verify that inference downloads are restricted to features.parquet
+    and trained model files, excluding raw and intermediate data.
+    """
+    calls = {}
+
+    monkeypatch.setenv("HF_TOKEN", "test-hf-token")
+
+    def fake_snapshot_download(**kwargs):
+        calls.update(kwargs)
+        return str(tmp_path)
+
+    monkeypatch.setattr(
+        hf_storage,
+        "snapshot_download",
+        fake_snapshot_download,
+    )
+
+    result = hf_storage.download_inference_artifacts(
+        local_dir=str(tmp_path)
+    )
+
+    assert calls["allow_patterns"] == [
+        "data/processed/features.parquet",
+        "models/**",
+    ]
+    assert calls["local_dir"] == str(tmp_path)
+    assert result == str(tmp_path)
+
+
+def test_download_inference_artifacts_uses_config(tmp_path, monkeypatch,):
+    """
+    Verify that inference downloads use the Hugging Face repository ID
+    and repository type defined in the application configuration.
+    """
+    calls = {}
+
+    monkeypatch.setenv("HF_TOKEN", "test-hf-token")
+
+    def fake_snapshot_download(**kwargs):
+        calls.update(kwargs)
+        return str(tmp_path)
+
+    monkeypatch.setattr(
+        hf_storage,
+        "snapshot_download",
+        fake_snapshot_download,
+    )
+
+    hf_storage.download_inference_artifacts(
+        local_dir=str(tmp_path)
+    )
+
+    assert calls["repo_id"] == config.HF_REPO_ID
+    assert calls["repo_type"] == config.HF_REPO_TYPE
+
+
+def test_download_inference_artifacts_passes_token(tmp_path,monkeypatch,):
+    """
+    Verify that HF_TOKEN is passed to snapshot_download so the private
+    Hugging Face repository can be accessed.
+    """
+    token = "test-hf-token"
+    calls = {}
+
+    monkeypatch.setenv("HF_TOKEN", token)
+
+    def fake_snapshot_download(**kwargs):
+        calls.update(kwargs)
+        return str(tmp_path)
+
+    monkeypatch.setattr(
+        hf_storage,
+        "snapshot_download",
+        fake_snapshot_download,
+    )
+
+    hf_storage.download_inference_artifacts(
+        local_dir=str(tmp_path)
+    )
+
+    assert calls["token"] == token
+
+
+def test_download_inference_artifacts_requires_token(monkeypatch,):
+    """
+    Verify that the inference download raises a RuntimeError when
+    HF_TOKEN is not configured.
+    """
+    monkeypatch.delenv("HF_TOKEN", raising=False)
+
+    with pytest.raises(RuntimeError, match="HF_TOKEN"):
+        hf_storage.download_inference_artifacts()
+
+
+def test_full_download_remains_unrestricted(tmp_path, monkeypatch,):
+    """
+    Verify that the original full repository download remains
+    unrestricted so it can still be used for training and feature
+    reconstruction.
+    """
+    calls = {}
+
+    monkeypatch.setenv("HF_TOKEN", "test-hf-token")
+
+    def fake_snapshot_download(**kwargs):
+        calls.update(kwargs)
+        return str(tmp_path)
+
+    monkeypatch.setattr(
+        hf_storage,
+        "snapshot_download",
+        fake_snapshot_download,
+    )
+
+    hf_storage.download_from_hf(
+        local_dir=str(tmp_path)
+    )
+
+    assert "allow_patterns" not in calls
