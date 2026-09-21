@@ -471,12 +471,14 @@ def load_json(path):
 @st.cache_data
 def load_tier_manifest(origin, destination):
 
-    return load_json(
-        tier_manifest_path(
-            origin,
-            destination,
-        )
+    path = os.path.join(
+        DATA_ROOT,
+        "models",
+        config.route_key(origin, destination),
+        "tier_manifest.json",
     )
+
+    return load_json(path)
 
 
 @st.cache_data
