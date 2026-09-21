@@ -519,9 +519,7 @@ def load_tier_models(origin, destination):
         A3
         etc.
     """
-    preprocessing_file = _absolute_model_path(
-        preprocessing_path
-    )
+
     manifest = load_tier_manifest(
         origin,
         destination,
