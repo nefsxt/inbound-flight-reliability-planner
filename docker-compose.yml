@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8501:8501"
+
+    env_file:
+      - .env
+
+    environment:
+      DATA_SOURCE: ${DATA_SOURCE:-local}
+      HF_TOKEN: ${HF_TOKEN:-}
+
+    working_dir: /app # Forces the Docker terminal to open exactly where the source code is (for Docker Desktop)
+
+    volumes:
+      # Bind-mount so data pulls, feature parquet files, and trained models
+      # persist on your host across container restarts/rebuilds -- without
+      # this, every `docker compose up --build` would wipe your OpenSky
+      # credit spend and force a full re-pull.
+      - .:/app
+      - ./data:/app/data
+      - ./models:/app/models
+
+    # `docker compose up` launches the Streamlit dashboard (the Dockerfile's
+    # default CMD). Use `docker compose run --rm app <command>` for the
+    # pipeline steps instead -- see README.md.

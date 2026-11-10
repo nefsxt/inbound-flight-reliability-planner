@@ -1,0 +1,13 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+venv/
+.venv/
+.env
+data/raw/*
+data/processed/*
+models/*
+!models/.gitkeep
+notebooks/
+*.zip
